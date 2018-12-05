@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """Combine multi-echo echoes.
-Currently inneficient as we load all datasets into memory. We could iterate
-through the volumes and only keep the final combined series in memory at any
-given time, but that's for later.
 
-Example usage:
+Tools to combine multiple echoes from an fMRI acquisition.
+It expects input files saved as NIfTIs, preferably organised
+according to the BIDS.
 
-echoes =
-load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
-paid_data = me_combine(echoes, algorithm='paid')
+Currently three different combination algorithms are supported, implementing
+the following weighting schemes:
 
-TODO: Where could things go wrong and what measures have to be implemented to
-avoid them? 1. Template not correctly specified may fail to load all data or
-load more data than necessary. Sprinkle assertions that the number of echoes
-combined match the input number of echoes given by the user.
+1. PAID => TE * SNR
+2. TE => TE
+3. Simple Average => 1
 """
 import argparse
 import glob
