@@ -46,8 +46,7 @@ You may also use =multiecho= as a library.
 To do the echo combination from within Python:
 
 #+BEGIN_SRC python
-echoes =
-load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
+echoes = load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
 paid_data = me_combine(echoes, algorithm='paid')
 #+END_SRC
 
@@ -66,3 +65,7 @@ at your option.
 Currently inneficient as we load all datasets into memory. We could iterate
 through the volumes and only keep the final combined series in memory at any
 given time, but that's for later.
+
+You may receive a RuntimeWarning when combining echoes with PAID. If your datasets have voxels with 0s, e.g., if they were masked, a division by 0 will lead to infinite weights. You may safely ignore the warning, but do check your data after the combination.
+
+PAID will compute the weights based on the last 100 volumes of the acquisition. Whether this is optimal or not is up to discussion. If you are testing out the combination on a small subset of volumes, say 5 or so, then the weights won't be stable and your image may look noisy.
