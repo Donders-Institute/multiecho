@@ -108,11 +108,11 @@ def main():
 def _cli_parser():
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('inputs', type='str',
+    parser.add_argument('inputs', type=str,
                         help='Globlike pattern with path to echoes')
     parser.add_argument('--echotimes', nargs='*', default=None,
                         help='Echo Times for all echoes.')
-    parser.add_argument('--outputname', type='str',
+    parser.add_argument('--outputname', type=str,
                         help='Optional file output name.')
 
     return parser
