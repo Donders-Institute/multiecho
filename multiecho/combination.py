@@ -101,7 +101,8 @@ def main():
     parser: argparse.ArgumentParser = _cli_parser()
     args: argparse.Namespace = parser.parse_args()
 
-    combined: nib.Nifti1Image = me_combine(args.inputs, args.echotimes)
+    combined: nib.Nifti1Image = me_combine(args.inputs, args.echotimes,
+                                           algorithm=args.algorithm)
     combined.to_filename(args.outputname)
 
 
@@ -113,7 +114,10 @@ def _cli_parser():
     parser.add_argument('--echotimes', nargs='*', default=None,
                         help='Echo Times for all echoes.')
     parser.add_argument('--outputname', type=str,
-                        help='Optional file output name.')
+                        help='File output name.')
+    parser.add_argument('--algorithm', default='paid',
+                        choices=['paid', 'te', 'average'],
+                        help='Combination algorithm. Default: paid')
 
     return parser
 
