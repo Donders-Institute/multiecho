@@ -23,8 +23,8 @@ import numpy as np
 
 
 def load_me_data(template: str,
-                 echotimes: Optional[Tuple[float]]) -> List[Tuple[np.array,
-                                                                  float]]:
+                 tes: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image,
+                                                            float]]:
     """Given a globlike template, load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
@@ -32,30 +32,34 @@ def load_me_data(template: str,
     """
     datafiles = list(sorted(glob.glob(template)))
     print(f'Loading: {datafiles}')
-    if echotimes is not None:
+    if tes is None:
         st = op.splitext
         json_template = [st(st(x)[0])[0] + '.json' for x in datafiles]
-        echotimes = [json.load(open(f, 'r'))['EchoTime']
-                     for f in json_template]
+        tes = [json.load(open(f, 'r'))['EchoTime']
+               for f in json_template]
 
-    print(f'Echotimes: {echotimes}')
-    return [(nib.load(x).get_data(), y) for x, y in zip(datafiles, echotimes)]
+    print(f'Echotimes: {tes}')
+    return [(nib.load(x), y) for x, y in zip(datafiles, tes)]
 
 
-def paid_weights(echoes: List[np.array], n_vols: int = 100) -> np.array:
+def paid_weights(echoes: List[nib.Nifti1Image],
+                 n_vols: int = 100) -> np.array:
     """Compute PAID weights from echoes described as a list of tuples,
     as loaded by load_me_data.
 
     w(tCNR) = TE * tSNR
     """
-    def weight(echo: np.array, te: float, n_vols: int = 100):
-        mean = echo[..., :n_vols].mean(axis=-1)
-        std = echo[..., :n_vols].std(axis=-1)
+    def weight(echo: nib.Nifti1Image, te: float, n_vols: int = 100):
+        data = echo.get_data()
+        mean = data[..., -n_vols:].mean(axis=-1)
+        std = data[..., -n_vols:].std(axis=-1)
         return te * mean / std
-    return np.stack([weight(echo, te, n_vols) for echo, te in echoes], axis=-1)
+
+    weights = [weight(echo, te, n_vols) for echo, te in echoes]
+    return np.stack(weights, axis=-1)
 
 
-def combine(echoes: List[np.array],
+def combine(echoes: List[nib.Nifti1Image],
             weights: Optional[Union[List[np.array], List[float]]]):
     """General echo combination function using np.average.
     Echoes is the list of tuples loaded by load_me_data, and weights is
@@ -63,11 +67,13 @@ def combine(echoes: List[np.array],
 
     See me_combine for example usage.
     """
-    data: np.array = np.stack([x[0] for x in echoes], axis=-1)
+    data: np.array = np.stack([x[0].get_data() for x in echoes], axis=-1)
     return np.average(data, axis=-1, weights=weights)
 
 
-def me_combine(template: str, algorithm: str = 'average'):
+def me_combine(template: str,
+               echotimes: Optional[List[float]] = None,
+               algorithm: str = 'average'):
     """General me_combine routine.
     TODO: (Eventually, if ever) Make this more general by accepting functions
     in place of strings for 'algorithm'.
@@ -77,7 +83,7 @@ def me_combine(template: str, algorithm: str = 'average'):
     - paid
     - te
     """
-    echoes: List[Tuple[np.array, float]] = load_me_data(template)
+    echoes: List[Tuple[np.array, float]] = load_me_data(template, echotimes)
 
     affine = echoes[0][0].affine
     header = echoes[0][0].header
@@ -86,11 +92,14 @@ def me_combine(template: str, algorithm: str = 'average'):
         weights = None
     elif algorithm == 'paid':
         weights = paid_weights(echoes)
-        weights = np.tile(weights, (1, 1, 1, echoes[0][0].shape[3], 1))
+        # Make the weights have the appropriate number of volumes.
+        weights = np.tile(weights[:, :, :, np.newaxis, :],
+                          (1, 1, 1, echoes[0][0].shape[3], 1))
     elif algorithm == 'te':
         weights = [te for data, te in echoes]
 
-    return nib.Nifti1Image(combine(echoes, weights), affine, header)
+    return nib.Nifti1Image(np.nan_to_num(combine(echoes, weights)),
+                           affine, header)
 
 
 def main():
@@ -108,7 +117,7 @@ def _cli_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('inputs', type=str,
                         help='Globlike pattern with path to echoes')
-    parser.add_argument('--echotimes', nargs='*', default=None,
+    parser.add_argument('--echotimes', nargs='*', default=None, type=float,
                         help='Echo Times for all echoes.')
     parser.add_argument('--outputname', type=str,
                         help='File output name.')
