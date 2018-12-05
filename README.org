@@ -1,0 +1,55 @@
+#+TITLE: Multi-echo Combinations
+
+This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
+It currently provides three different combination algorithms:
+
+ - Simple Average :: Echoes are averaged.
+ - CNR Weighting (a.k.a. PAID) :: Echoes are weighted by their TE*SNR contributions, then averaged.
+ - TE :: Echoes are weighted by their TEs.
+
+
+/MECOMBINE/ is alpha software. Please report if you find any bugs or if you have any feature requests. 
+
+* Installation
+
+To install, clone this repository and run the following on the root folder of the repository:
+
+#+BEGIN_SRC sh
+$ python setup.py install
+#+END_SRC
+
+To install as a developer:
+
+#+BEGIN_SRC sh
+$ python setup.py develop
+#+END_SRC
+
+The tool only supports Python 3.6+.
+
+* Usage
+
+Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running:
+
+#+BEGIN_SRC sh
+mecombine --help
+#+END_SRC
+
+In short,  =mecombine= is being designed to work with the Brain Imaging Data Structure (BIDS). Curresntly, the recommended usage is:
+
+#+BEGIN_SRC sh
+mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined'
+#+END_SRC
+
+Which, if your folder is BIDS compliant, should work out of the box. Because =mecombine= accepts a /glob-like/ pattern, be sure to check that not too many files are being read. Currently, =mecombine= has no proper logging implemented, but it'll print the names of the files being combined, as well as their echoes.
+
+If your 
+
+* License
+
+Multiecho is distributed under the terms of both
+
+- [[https://choosealicense.com/licenses/mit][MIT License]]
+- [[https://choosealicense.com/licenses/apache-2.0][Apache License, Version 2.0]]
+
+at your option.
+
