@@ -34,7 +34,7 @@ Once installed, a command line tool called mecombine will be available in your P
 mecombine --help
 #+END_SRC
 
-In short,  =mecombine= is being designed to work with the Brain Imaging Data Structure (BIDS). Curresntly, the recommended usage is:
+In short,  =mecombine= is being designed to work with the Brain Imaging Data Structure (BIDS). Recommended usage is:
 
 #+BEGIN_SRC sh
 mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined'
