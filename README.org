@@ -42,7 +42,14 @@ mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.g
 
 Which, if your folder is BIDS compliant, should work out of the box. Because =mecombine= accepts a /glob-like/ pattern, be sure to check that not too many files are being read. Currently, =mecombine= has no proper logging implemented, but it'll print the names of the files being combined, as well as their echoes.
 
-If your 
+You may also use =multiecho= as a library.
+To do the echo combination from within Python:
+
+#+BEGIN_SRC python
+echoes =
+load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
+paid_data = me_combine(echoes, algorithm='paid')
+#+END_SRC
 
 * License
 
@@ -53,3 +60,9 @@ Multiecho is distributed under the terms of both
 
 at your option.
 
+
+* Caveats
+
+Currently inneficient as we load all datasets into memory. We could iterate
+through the volumes and only keep the final combined series in memory at any
+given time, but that's for later.
