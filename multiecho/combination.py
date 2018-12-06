@@ -68,6 +68,7 @@ def combine(echoes: List[nib.Nifti1Image],
     See me_combine for example usage.
     """
     data: np.array = np.stack([x[0].get_data() for x in echoes], axis=-1)
+    # np.average will normalise the weights. No need to do that manually.
     return np.average(data, axis=-1, weights=weights)
 
 
