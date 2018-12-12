@@ -37,7 +37,7 @@ mecombine --help
 In short,  =mecombine= is being designed to work with the Brain Imaging Data Structure (BIDS). Recommended usage is:
 
 #+BEGIN_SRC sh
-mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined'
+mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined' --saveweights
 #+END_SRC
 
 Which, if your folder is BIDS compliant, should work out of the box. Because =mecombine= accepts a /glob-like/ pattern, be sure to check that not too many files are being read. Currently, =mecombine= has no proper logging implemented, but it'll print the names of the files being combined, as well as their echoes.
@@ -46,8 +46,9 @@ You may also use =multiecho= as a library.
 To do the echo combination from within Python:
 
 #+BEGIN_SRC python
-echoes = load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
-paid_data = me_combine(echoes, algorithm='paid')
+import multiecho.combination as me
+echoes = me.load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
+paid_data, weights = me.me_combine(echoes, algorithm='paid')
 #+END_SRC
 
 * License

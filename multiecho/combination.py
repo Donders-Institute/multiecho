@@ -99,8 +99,10 @@ def me_combine(template: str,
     elif algorithm == 'te':
         weights = [te for data, te in echoes]
 
-    return nib.Nifti1Image(np.nan_to_num(combine(echoes, weights)),
-                           affine, header)
+    combined = nib.Nifti1Image(np.nan_to_num(combine(echoes, weights)),
+                               affine, header)
+
+    return combined, weights
 
 
 def main():
@@ -108,9 +110,18 @@ def main():
     parser: argparse.ArgumentParser = _cli_parser()
     args: argparse.Namespace = parser.parse_args()
 
-    combined: nib.Nifti1Image = me_combine(args.inputs, args.echotimes,
-                                           algorithm=args.algorithm)
+    combined, weights = me_combine(args.inputs, args.echotimes,
+                                   algorithm=args.algorithm)
+
     combined.to_filename(args.outputname)
+
+    if args.saveweights and args.algorithm == 'paid':
+        st = op.splitext
+        fname = st(st(args.outputname)[0])[0] + '_weights.nii.gz'
+        nifti_weights = nib.Nifti1Image(np.squeeze(weights[..., 0, :]),
+                                        combined.affine,
+                                        combined.header)
+        nifti_weights.to_filename(fname)
 
 
 def _cli_parser():
@@ -125,6 +136,8 @@ def _cli_parser():
     parser.add_argument('--algorithm', default='paid',
                         choices=['paid', 'te', 'average'],
                         help='Combination algorithm. Default: paid')
+    parser.add_argument('--saveweights', action='store_true',
+                        help='If passed and algorithm is PAID, save weights.')
 
     return parser
 
