@@ -12,6 +12,7 @@ the following weighting schemes:
 2. TE => TE
 3. Simple Average => 1
 """
+import os
 import argparse
 import glob
 import json
@@ -108,7 +109,33 @@ def me_combine(template: str,
     return combined, weights
 
 
+def setup_logger():
+    """Setup logging to file and console.
+    """
+    # Remove the old log file if it exist
+    log_filename = 'mecombine.log'
+    if os.path.exists(log_filename):
+        os.remove(log_filename)
+
+    logger.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s %(message)s',
+                                  '%Y-%m-%d %H:%M:%S')
+
+    streamhandler = logging.StreamHandler()
+    streamhandler.setLevel(logging.INFO)
+    streamhandler.setFormatter(formatter)
+    logger.addHandler(streamhandler)
+
+    filehandler = logging.FileHandler(log_filename)
+    filehandler.setLevel(logging.INFO)
+    filehandler.setFormatter(formatter)
+    logger.addHandler(filehandler)
+
+
 def main():
+
+    setup_logger()
 
     parser: argparse.ArgumentParser = _cli_parser()
     args: argparse.Namespace = parser.parse_args()

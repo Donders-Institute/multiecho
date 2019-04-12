@@ -10,5 +10,6 @@ multiecho.egg-info/
 build/
 dist/
 docs/build/
+pip-wheel-metadata/
 venv/
 wheelhouse/
