@@ -15,11 +15,14 @@ the following weighting schemes:
 import argparse
 import glob
 import json
+import logging
 import os.path as op
 from typing import List, Optional, Tuple, Union
 
 import nibabel as nib
 import numpy as np
+
+logger = logging.getLogger('mecombine')
 
 
 def load_me_data(template: str,
@@ -31,14 +34,14 @@ def load_me_data(template: str,
     Here, echoN is a numpy array of loaded data.
     """
     datafiles = list(sorted(glob.glob(template)))
-    print(f'Loading: {datafiles}')
+    logger.info(f'Loading: {datafiles}')
     if tes is None:
         st = op.splitext
         json_template = [st(st(x)[0])[0] + '.json' for x in datafiles]
         tes = [json.load(open(f, 'r'))['EchoTime']
                for f in json_template]
 
-    print(f'Echotimes: {tes}')
+    logger.info(f'Echotimes: {tes}')
     return [(nib.load(x), y) for x, y in zip(datafiles, tes)]
 
 
@@ -142,5 +145,5 @@ def _cli_parser():
     return parser
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
