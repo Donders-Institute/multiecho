@@ -7,8 +7,13 @@ It currently provides three different combination algorithms:
  - CNR Weighting (a.k.a. PAID) :: Echoes are weighted by their TE*SNR contributions, then averaged.
  - TE :: Echoes are weighted by their TEs.
 
-
 /MECOMBINE/ is alpha software. Please report if you find any bugs or if you have any feature requests. 
+
+For more information on multiecho acquisition and combination schemes, please refer to (for example):
+
+[[https://onlinelibrary.wiley.com/doi/full/10.1002/mrm.20900][Poser et al. (2006)]]. “BOLD Contrast Sensitivity Enhancement and Artifact Reduction with Multiecho EPI: Parallel-Acquired Inhomogeneity- Desensitized fMRI.” Magn. Reson. Med. 55:6, pp. 1227–35.
+
+[[https://doi.org/10.1016/j.neuroimage.2011.10.057][Posse, Stefan (2012).]] “Multi-Echo Acquisition”. NeuroImage 62:2, pp. 665–671.
 
 * Installation
 
