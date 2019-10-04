@@ -1,12 +1,15 @@
 *.log
 *.pyc
 .cache/
-.coverage
+.coverage*
+.eggs/
 .idea/
 .vscode/
+.tox/
 multiecho.egg-info/
 build/
 dist/
 docs/build/
+pip-wheel-metadata/
 venv/
 wheelhouse/

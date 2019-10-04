@@ -12,14 +12,18 @@ the following weighting schemes:
 2. TE => TE
 3. Simple Average => 1
 """
+import os
 import argparse
 import glob
 import json
+import logging
 import os.path as op
 from typing import List, Optional, Tuple, Union
 
 import nibabel as nib
 import numpy as np
+
+logger = logging.getLogger('mecombine')
 
 
 def load_me_data(template: str,
@@ -31,14 +35,14 @@ def load_me_data(template: str,
     Here, echoN is a numpy array of loaded data.
     """
     datafiles = list(sorted(glob.glob(template)))
-    print(f'Loading: {datafiles}')
+    logger.info(f'Loading: {datafiles}')
     if tes is None:
         st = op.splitext
         json_template = [st(st(x)[0])[0] + '.json' for x in datafiles]
         tes = [json.load(open(f, 'r'))['EchoTime']
                for f in json_template]
 
-    print(f'Echotimes: {tes}')
+    logger.info(f'Echotimes: {tes}')
     return [(nib.load(x), y) for x, y in zip(datafiles, tes)]
 
 
@@ -105,7 +109,33 @@ def me_combine(template: str,
     return combined, weights
 
 
+def setup_logger():
+    """Setup logging to file and console.
+    """
+    # Remove the old log file if it exist
+    log_filename = 'mecombine.log'
+    if os.path.exists(log_filename):
+        os.remove(log_filename)
+
+    logger.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s %(message)s',
+                                  '%Y-%m-%d %H:%M:%S')
+
+    streamhandler = logging.StreamHandler()
+    streamhandler.setLevel(logging.INFO)
+    streamhandler.setFormatter(formatter)
+    logger.addHandler(streamhandler)
+
+    filehandler = logging.FileHandler(log_filename)
+    filehandler.setLevel(logging.INFO)
+    filehandler.setFormatter(formatter)
+    logger.addHandler(filehandler)
+
+
 def main():
+
+    setup_logger()
 
     parser: argparse.ArgumentParser = _cli_parser()
     args: argparse.Namespace = parser.parse_args()
@@ -142,5 +172,5 @@ def _cli_parser():
     return parser
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
