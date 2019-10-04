@@ -20,11 +20,11 @@ from typing import List, Optional, Tuple, Union
 
 import nibabel as nib
 import numpy as np
+import pybids as bids
 
 
 def load_me_data(template: str,
-                 tes: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image,
-                                                            float]]:
+                 tes: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
     """Given a globlike template, load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
@@ -110,8 +110,7 @@ def main():
     parser: argparse.ArgumentParser = _cli_parser()
     args: argparse.Namespace = parser.parse_args()
 
-    combined, weights = me_combine(args.inputs, args.echotimes,
-                                   algorithm=args.algorithm)
+    combined, weights = me_combine(args.inputs, args.echotimes, algorithm=args.algorithm)
 
     combined.to_filename(args.outputname)
 
@@ -128,7 +127,7 @@ def _cli_parser():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('inputs', type=str,
-                        help='Globlike pattern with path to echoes')
+                        help='BIDS root directory or a globlike pattern with path to echoes')
     parser.add_argument('--echotimes', nargs='*', default=None, type=float,
                         help='Echo Times for all echoes.')
     parser.add_argument('--outputname', type=str,

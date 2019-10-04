@@ -1,11 +1,11 @@
 [metadata]
 name = 'multiecho'
-version = '0.0.1'
+version = '0.1'
 description = 'Combine multi-echoes from a multi-echo fMRI acquisition.'
-author = 'Daniel Gomez'
-author_email = 'd.gomez@donders.ru.nl'
+author = 'Daniel Gomez and Marcel Zwiers'
+author_email = 'm.zwiers@donders.ru.nl'
 license = 'MIT/Apache-2.0'
-url = 'https://github.com/dangom/multiecho'
+url = 'https://github.com/Donders-Institute/multiecho'
 
 [requires]
 python_version = ['3.6', '3.7']
