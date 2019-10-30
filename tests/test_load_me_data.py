@@ -6,7 +6,7 @@ class MyUnitTest(unittest.TestCase):
 
     def test_load_me_data(self):
         with patch('multiecho.combination.logger') as log_mock:
-            multiecho.combination.load_me_data("", tes=None)
+            multiecho.combination.load_me_data("", TEs=None)
             calls = [
                 call.info('Loading: []'),
                 call.info('Echotimes: []')

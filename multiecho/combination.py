@@ -3,7 +3,7 @@
 
 Tools to combine multiple echoes from an fMRI acquisition.
 It expects input files saved as NIfTIs, preferably organised
-according to the BIDS.
+according to the BIDS standard.
 
 Currently three different combination algorithms are supported, implementing
 the following weighting schemes:
@@ -12,42 +12,39 @@ the following weighting schemes:
 2. TE => TE
 3. Simple Average => 1
 """
-import os
+
 import argparse
 import glob
 import json
 import logging
+import coloredlogs
 import os.path as op
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import nibabel as nib
 import numpy as np
-import pybids as bids
 
-logger = logging.getLogger('mecombine')
+LOGGER = logging.getLogger()
 
 
-def load_me_data(template: str,
-                 tes: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
-    """Given a globlike template, load all echoes and their TEs.
+def load_me_data(datafiles: list, TEs: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
+    """Load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
     Here, echoN is a numpy array of loaded data.
     """
-    datafiles = list(sorted(glob.glob(template)))
-    logger.info(f'Loading: {datafiles}')
-    if tes is None:
-        st = op.splitext
-        json_template = [st(st(x)[0])[0] + '.json' for x in datafiles]
-        tes = [json.load(open(f, 'r'))['EchoTime']
-               for f in json_template]
 
-    logger.info(f'Echotimes: {tes}')
-    return [(nib.load(x), y) for x, y in zip(datafiles, tes)]
+    if TEs is None:
+        json_template = [op.splitext(op.splitext(datafile)[0])[0] + '.json' for datafile in datafiles]
+        TEs = [json.load(open(f, 'r'))['EchoTime'] for f in json_template]
+
+    LOGGER.info(f'Multi-Echo times: {TEs}')
+    LOGGER.info(f'Loading ME-files: {datafiles}')
+
+    return [(nib.load(datafile), TE) for datafile, TE in zip(datafiles, TEs)]
 
 
-def paid_weights(echoes: List[nib.Nifti1Image],
-                 n_vols: int = 100) -> np.array:
+def paid_weights(echoes: List[nib.Nifti1Image], n_vols: int) -> np.array:
     """Compute PAID weights from echoes described as a list of tuples,
     as loaded by load_me_data.
 
@@ -56,120 +53,98 @@ def paid_weights(echoes: List[nib.Nifti1Image],
     def weight(echo: nib.Nifti1Image, te: float, n_vols: int = 100):
         data = echo.get_data()
         mean = data[..., -n_vols:].mean(axis=-1)
-        std = data[..., -n_vols:].std(axis=-1)
+        std  = data[..., -n_vols:].std(axis=-1)
         return te * mean / std
 
     weights = [weight(echo, te, n_vols) for echo, te in echoes]
+
     return np.stack(weights, axis=-1)
 
 
-def combine(echoes: List[nib.Nifti1Image],
-            weights: Optional[Union[List[np.array], List[float]]]):
-    """General echo combination function using np.average.
-    Echoes is the list of tuples loaded by load_me_data, and weights is
-    either of the same as the echo datasets stacked, or a 1D vector.
-
-    See me_combine for example usage.
-    """
-    data: np.array = np.stack([x[0].get_data() for x in echoes], axis=-1)
-    # np.average will normalise the weights. No need to do that manually.
-    return np.average(data, axis=-1, weights=weights)
-
-
-def me_combine(template: str,
-               echotimes: Optional[List[float]] = None,
-               algorithm: str = 'average'):
+def me_combine(pattern: str,
+               outputname: str = '',
+               algorithm: str = 'TE',
+               weights: Optional[List[float]] = None,
+               saveweights: bool = True,
+               volumes: int = 100):
     """General me_combine routine.
-    TODO: (Eventually, if ever) Make this more general by accepting functions
-    in place of strings for 'algorithm'.
 
     Currently supported algorithms:
     - average
-    - paid
-    - te
+    - PAID
+    - TE
     """
-    echoes: List[Tuple[np.array, float]] = load_me_data(template, echotimes)
 
-    affine = echoes[0][0].affine
-    header = echoes[0][0].header
+    st = op.splitext
 
+    # Set the logging level and format & add the streamhandler
+    if not LOGGER.hasHandlers():
+        LOGGER.setLevel(logging.INFO)
+        fmt     = '%(asctime)s - %(name)s - %(levelname)s %(message)s'
+        datefmt = '%Y-%m-%d %H:%M:%S'
+        coloredlogs.install(level='DEBUG', fmt=fmt, datefmt=datefmt)
+
+    # Parse the filenames
+    datafiles      = sorted(glob.glob(pattern))
+    datafile, ext2 = st(datafiles[0])
+    datafile, ext1 = st(datafile)
+    if not outputname:
+        outputname = datafile + '_combined' + ext1 + ext2
+    if outputname == op.basename(outputname):
+        outputname = op.join(op.dirname(datafile), outputname)
+
+    # Load the data
+    me_data = load_me_data(datafiles, weights)
+
+    # Compute the weights
     if algorithm == 'average':
         weights = None
-    elif algorithm == 'paid':
-        weights = paid_weights(echoes)
+    elif algorithm == 'PAID':
+        weights = paid_weights(me_data, volumes)
         # Make the weights have the appropriate number of volumes.
         weights = np.tile(weights[:, :, :, np.newaxis, :],
-                          (1, 1, 1, echoes[0][0].shape[3], 1))
-    elif algorithm == 'te':
-        weights = [te for data, te in echoes]
+                          (1, 1, 1, me_data[0][0].shape[3], 1))
+    elif algorithm == 'TE':
+        weights = [TE for echo, TE in me_data]
+    else:
+        LOGGER.error(f'Unknown algorithm: {algorithm}')
 
-    combined = nib.Nifti1Image(np.nan_to_num(combine(echoes, weights)),
-                               affine, header)
+    # Combine the images
+    echos    = np.stack([echo.get_data() for echo, TE in me_data], axis=-1)
+    combined = np.average(echos, axis=-1, weights=weights)      # np.average normalizes the weights. No need to do that manually.
+    affine   = me_data[0][0].affine
+    header   = me_data[0][0].header
+    combined = nib.Nifti1Image(np.nan_to_num(combined), affine, header)
+    LOGGER.info(f'Saving combined image to: {outputname}')
+    combined.to_filename(outputname)
 
-    return combined, weights
-
-
-def setup_logger():
-    """Setup logging to file and console.
-    """
-    # Remove the old log file if it exist
-    log_filename = 'mecombine.log'
-    if os.path.exists(log_filename):
-        os.remove(log_filename)
-
-    logger.setLevel(logging.INFO)
-
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s %(message)s',
-                                  '%Y-%m-%d %H:%M:%S')
-
-    streamhandler = logging.StreamHandler()
-    streamhandler.setLevel(logging.INFO)
-    streamhandler.setFormatter(formatter)
-    logger.addHandler(streamhandler)
-
-    filehandler = logging.FileHandler(log_filename)
-    filehandler.setLevel(logging.INFO)
-    filehandler.setFormatter(formatter)
-    logger.addHandler(filehandler)
-
-
-def main():
-
-    setup_logger()
-
-    parser: argparse.ArgumentParser = _cli_parser()
-    args: argparse.Namespace = parser.parse_args()
-
-    combined, weights = me_combine(args.inputs, args.echotimes, algorithm=args.algorithm)
-
-    combined.to_filename(args.outputname)
-
-    if args.saveweights and args.algorithm == 'paid':
-        st = op.splitext
-        fname = st(st(args.outputname)[0])[0] + '_weights.nii.gz'
+    # Save the weights
+    if saveweights and algorithm == 'PAID':
+        fname = st(st(outputname)[0])[0] + '_weights' + ext1 + ext2
         nifti_weights = nib.Nifti1Image(np.squeeze(weights[..., 0, :]),
                                         combined.affine,
                                         combined.header)
+        LOGGER.info(f'Saving PAID weights to: {fname}')
         nifti_weights.to_filename(fname)
 
 
-def _cli_parser():
+if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('inputs', type=str,
-                        help='BIDS root directory or a globlike pattern with path to echoes')
-    parser.add_argument('--echotimes', nargs='*', default=None, type=float,
-                        help='Echo Times for all echoes.')
-    parser.add_argument('--outputname', type=str,
-                        help='File output name.')
-    parser.add_argument('--algorithm', default='paid',
-                        choices=['paid', 'te', 'average'],
-                        help='Combination algorithm. Default: paid')
-    parser.add_argument('--saveweights', action='store_true',
-                        help='If passed and algorithm is PAID, save weights.')
+    parser.add_argument('pattern', type=str,
+                        help='Globlike search pattern with path to select the echo images that need to be combined')
+    parser.add_argument('-o','--outputname', type=str,
+                        help="File output name. If not a fullpath name, then the output will be stored in the same folder as the input. If empty, the output filename will be the filename of the first echo appended with a '_combined' suffix")
+    parser.add_argument('-w','--weights', nargs='*', default=None, type=float,
+                        help='Weights (e.g. = echo times) for all echoes')
+    parser.add_argument('-a','--algorithm', default='TE',
+                        choices=['PAID', 'TE', 'average'],
+                        help='Combination algorithm. Default: TE')
+    parser.add_argument('-s','--saveweights', action='store_true',
+                        help='If passed and algorithm is PAID, save weights')
+    parser.add_argument('-v','--volumes', type=int, default=100,
+                        help='Number of volumes that is used to compute the weights if algorithm is PAID')
 
-    return parser
+    args = parser.parse_args()
 
-
-if __name__ == '__main__':
-    main()
+    me_combine(pattern=args.pattern, outputname=args.outputname, algorithm=args.algorithm, weights=args.weights, saveweights=args.saveweights, volumes=args.volumes)
