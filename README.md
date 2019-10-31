@@ -34,9 +34,9 @@ The tool only supports Python 3.6+.
 
 Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
 
-    usage: combination.py [-h] [-o OUTPUTNAME] [-w [WEIGHTS [WEIGHTS ...]]]
-                          [-a {PAID,TE,average}] [-s] [-v VOLUMES]
-                          pattern
+    usage: mecombine [-h] [-o OUTPUTNAME] [-w [WEIGHTS [WEIGHTS ...]]]
+                     [-a {PAID,TE,average}] [-s] [-v VOLUMES]
+                     pattern
     
     Combine multi-echo echoes.
     
@@ -70,9 +70,9 @@ Once installed, a command line tool called mecombine will be available in your P
                             if algorithm is PAID (default: 100)
     
     examples:
-      combination.py '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'
-      combination.py '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID
-      combination.py '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33
+      mecombine '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'
+      mecombine '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID
+      mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33
 
 ## Caveats
 

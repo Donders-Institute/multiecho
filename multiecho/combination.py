@@ -139,9 +139,9 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=CustomFormatter,
                                      description=textwrap.dedent(__doc__),
                                      epilog="examples:\n"
-                                            "  combination.py '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
-                                            "  combination.py '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
-                                            "  combination.py '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33\n ")
+                                            "  mecombine '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
+                                            "  mecombine '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
+                                            "  mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33\n ")
     parser.add_argument('pattern', type=str,
                         help='Globlike search pattern with path to select the echo images that need to be combined. Because of the search, be sure to check that not too many files are being read')
     parser.add_argument('-o','--outputname', type=str,
