@@ -28,12 +28,14 @@ import numpy as np
 LOGGER = logging.getLogger()
 
 
-def load_me_data(datafiles: list, TEs: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
+def load_me_data(pattern: str, TEs: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
     """Load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
     Here, echoN is a numpy array of loaded data.
     """
+
+    datafiles = sorted(glob.glob(pattern))
 
     if TEs is None:
         json_template = [op.splitext(op.splitext(datafile)[0])[0] + '.json' for datafile in datafiles]
@@ -42,7 +44,7 @@ def load_me_data(datafiles: list, TEs: Optional[Tuple[float]]) -> List[Tuple[nib
     LOGGER.info(f'Multi-Echo times: {TEs}')
     LOGGER.info(f'Loading ME-files: {datafiles}')
 
-    return [(nib.load(datafile), TE) for datafile, TE in zip(datafiles, TEs)]
+    return [(nib.load(datafile), TE) for datafile, TE in zip(datafiles, TEs)], datafiles
 
 
 def paid_weights(echoes: List[nib.Nifti1Image], n_vols: int) -> np.array:
@@ -86,17 +88,16 @@ def me_combine(pattern: str,
         datefmt = '%Y-%m-%d %H:%M:%S'
         coloredlogs.install(level='DEBUG', fmt=fmt, datefmt=datefmt)
 
+    # Load the data
+    me_data, datafiles = load_me_data(pattern, weights)
+
     # Parse the filenames
-    datafiles      = sorted(glob.glob(pattern))
     datafile, ext2 = st(datafiles[0])
     datafile, ext1 = st(datafile)
     if not outputname:
         outputname = datafile + '_combined' + ext1 + ext2
     if outputname == op.basename(outputname):
         outputname = op.join(op.dirname(datafile), outputname)
-
-    # Load the data
-    me_data = load_me_data(datafiles, weights)
 
     # Compute the weights
     if algorithm == 'average':
