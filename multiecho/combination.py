@@ -131,6 +131,7 @@ def me_combine(pattern: str,
 
 
 def main():
+    """Console script usage"""
 
     class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
         pass
