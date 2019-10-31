@@ -1,4 +1,4 @@
-# Multi-echo Combinations
+# Multi-echo combinations
 
 This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
 It currently provides three different echo avering algorithms:
@@ -32,15 +32,47 @@ The tool only supports Python 3.6+.
 
 ## Usage
 
-Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running:
+Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
 
-    mecombine --help
-
-In short, `mecombine` is being designed to work with the Brain Imaging Data Structure (BIDS). Recommended usage is:
-
-    mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined' --saveweights
-
-Which, if your folder is BIDS compliant, should work out of the box. Because `mecombine` accepts a *glob-like* pattern, be sure to check that not too many files are being read.
+    usage: combination.py [-h] [-o OUTPUTNAME] [-w [WEIGHTS [WEIGHTS ...]]]
+                          [-a {PAID,TE,average}] [-s] [-v VOLUMES]
+                          pattern
+    
+    Combine multi-echo echoes.
+    
+    Tools to combine multiple echoes from an fMRI acquisition.
+    It expects input files saved as NIfTIs, preferably organised
+    according to the BIDS standard.
+    
+    positional arguments:
+      pattern               Globlike search pattern with path to select the echo
+                            images that need to be combined. Because of the
+                            search, be sure to check that not too many files are
+                            being read
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -o OUTPUTNAME, --outputname OUTPUTNAME
+                            File output name. If not a fullpath name, then the
+                            output will be stored in the same folder as the input.
+                            If empty, the output filename will be the filename of
+                            the first echo appended with a '_combined' suffix
+                            (default: None)
+      -w [WEIGHTS [WEIGHTS ...]], --weights [WEIGHTS [WEIGHTS ...]]
+                            Weights (e.g. = echo times) for all echoes (default:
+                            None)
+      -a {PAID,TE,average}, --algorithm {PAID,TE,average}
+                            Combination algorithm. Default: TE (default: TE)
+      -s, --saveweights     If passed and algorithm is PAID, save weights
+                            (default: False)
+      -v VOLUMES, --volumes VOLUMES
+                            Number of volumes that is used to compute the weights
+                            if algorithm is PAID (default: 100)
+    
+    examples:
+      combination.py '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'
+      combination.py '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID
+      combination.py '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33
 
 ## Caveats
 
