@@ -1,4 +1,4 @@
-# TITLE: Multi-echo Combinations
+# Multi-echo Combinations
 
 This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
 It currently provides three different echo avering algorithms:
