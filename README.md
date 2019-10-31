@@ -42,13 +42,6 @@ In short, `mecombine` is being designed to work with the Brain Imaging Data Stru
 
 Which, if your folder is BIDS compliant, should work out of the box. Because `mecombine` accepts a *glob-like* pattern, be sure to check that not too many files are being read.
 
-You may also use `multiecho` as a library.
-To do the echo combination from within Python:
-
-    import multiecho.combination as me
-    echoes = me.load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
-    paid_data, weights = me.me_combine(echoes, algorithm='paid')
-
 ## Caveats
 
 Currently inneficient as we load all datasets into memory. We could iterate through the volumes and only keep the final combined series in memory at any given time.
