@@ -14,6 +14,7 @@ the following weighting schemes:
 """
 
 import argparse
+import textwrap
 import glob
 import json
 import logging
@@ -130,7 +131,15 @@ def me_combine(pattern: str,
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+        pass
+
+    parser = argparse.ArgumentParser(formatter_class=CustomFormatter,
+                                     description=textwrap.dedent(__doc__),
+                                     epilog="examples:\n"
+                                            "  combination.py '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
+                                            "  combination.py '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
+                                            "  combination.py '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33\n ")
     parser.add_argument('pattern', type=str,
                         help='Globlike search pattern with path to select the echo images that need to be combined')
     parser.add_argument('-o','--outputname', type=str,
