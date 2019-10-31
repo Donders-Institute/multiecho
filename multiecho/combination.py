@@ -51,13 +51,14 @@ def paid_weights(echoes: List[nib.Nifti1Image], n_vols: int) -> np.array:
 
     w(tCNR) = TE * tSNR
     """
-    def weight(echo: nib.Nifti1Image, te: float, n_vols: int = 100):
+    def weight(echo: nib.Nifti1Image, TE: float, n_vols: int):
         data = echo.get_data()
         mean = data[..., -n_vols:].mean(axis=-1)
         std  = data[..., -n_vols:].std(axis=-1)
-        return te * mean / std
+        return TE * mean / std
 
-    weights = [weight(echo, te, n_vols) for echo, te in echoes]
+    n_vols  = min(n_vols, echoes[0][0].shape[3])
+    weights = [weight(echo, TE, n_vols) for echo, TE in echoes]
 
     return np.stack(weights, axis=-1)
 
