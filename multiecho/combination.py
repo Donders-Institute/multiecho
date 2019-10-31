@@ -130,7 +130,7 @@ def me_combine(pattern: str,
         nifti_weights.to_filename(fname)
 
 
-if __name__ == '__main__':
+def main():
 
     class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
         pass
@@ -158,3 +158,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     me_combine(pattern=args.pattern, outputname=args.outputname, algorithm=args.algorithm, weights=args.weights, saveweights=args.saveweights, volumes=args.volumes)
+
+
+if __name__ == '__main__':
+    main()
