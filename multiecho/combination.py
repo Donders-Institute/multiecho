@@ -118,6 +118,8 @@ def me_combine(pattern: str,
     header   = me_data[0][0].header
     combined = nib.Nifti1Image(np.nan_to_num(combined), affine, header)
     LOGGER.info(f'Saving combined image to: {outputname}')
+    if op.isfile(outputname):
+        LOGGER.warning(f'{outputname} already exists, overwriting its content')
     combined.to_filename(outputname)
 
     # Save the weights
