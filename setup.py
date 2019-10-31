@@ -1,22 +1,25 @@
 from io import open
-
+from os import path
 from setuptools import find_packages, setup
 
-with open('multiecho/__init__.py', 'r') as f:
-    for line in f:
-        if line.startswith('__version__'):
-            version = line.strip().split('=')[1].strip(' \'"')
-            break
-    else:
-        version = '0.2'
+# Read the version from file
+with open(path.join(path.dirname(__file__), 'version.txt')) as fid:
+    version = fid.read().strip()
 
-with open('README.org', 'r', encoding='utf-8') as f:
+# Read the contents of the README file
+with open('README.md', 'r', encoding='utf-8') as f:
     readme = f.read()
 
-REQUIRES = ['nibabel', 'numpy']
+# Read the contents of the requirements file
+with open(path.join(path.abspath(path.dirname(__file__)), 'requirements.txt')) as fid:
+    requirements = fid.read().splitlines()
 
-setup(name              = 'multiecho',
-      version           = version,
+setup(name              = 'multiecho',          # Required
+      version           = version,              # Required
+      packages          = find_packages(),      # Required
+      install_requires  = requirements,
+      tests_require     = ['coverage', 'pytest'],
+      entry_points      = {'console_scripts': ['mecombine = multiecho.combination:main']},
       description       = 'Combine multi-echoes from a multi-echo fMRI acquisition.',
       long_description  = readme,
       author            = 'Daniel Gomez',
@@ -33,8 +36,4 @@ setup(name              = 'multiecho',
                            'Operating System :: OS Independent',
                            'Programming Language :: Python :: 3.6',
                            'Programming Language :: Python :: 3.7',
-                           'Programming Language :: Python :: Implementation :: CPython'],
-      entry_points      = {'console_scripts': ['mecombine = multiecho.combination:main']},
-      install_requires  = REQUIRES,
-      tests_require     = ['coverage', 'pytest'],
-      packages          = find_packages())
+                           'Programming Language :: Python :: Implementation :: CPython'])
