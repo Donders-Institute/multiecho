@@ -3,8 +3,8 @@
 This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
 It currently provides three different echo avering algorithms:
 
-|||
-|:--------- |:-----------|
+|algorithm  | description |
+|:--------- |:----------- |
 |1. average | Echoes are weighted equally
 |2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions
 |3. TE      | Echoes are weighted by their TEs
@@ -16,32 +16,38 @@ For more information on multiecho acquisition and combination schemes, please re
 
 ## Installation
 
-To install, clone this repository and run the following on the root folder of the repository:
-   `python setup.py install`
+To install, simply run:
 
-To install as a developer:
-   `python setup.py develop`
+    pip install multiecho
+ 
+This will give you the latest stable release of the software. To get the very latest version of the software you can install the package directly from the github source code repository:
+
+    pip install git+https://github.com/Donders-Institute/multiecho
+
+Alternatively, to get the latest (possibly unreleased) code, clone this repository and run the following on the root folder of the repository:
+
+    pip install .
 
 The tool only supports Python 3.6+.
 
 ## Usage
 
 Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running:
-   `mecombine --help`
+
+    mecombine --help
 
 In short, `mecombine` is being designed to work with the Brain Imaging Data Structure (BIDS). Recommended usage is:
-   `mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined' --saveweights`
+
+    mecombine '/project/number/experiment-datasets/sub-01/func/*task-A_*echo-*.nii.gz' --outputname 'echoes_combined' --saveweights
 
 Which, if your folder is BIDS compliant, should work out of the box. Because `mecombine` accepts a *glob-like* pattern, be sure to check that not too many files are being read.
 
 You may also use `multiecho` as a library.
 To do the echo combination from within Python:
 
-   ```
-   import multiecho.combination as me
-   echoes = me.load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
-   paid_data, weights = me.me_combine(echoes, algorithm='paid')
-   ```
+    import multiecho.combination as me
+    echoes = me.load_me_data('/project/datasets/sub-01/ses-01/func/*mbme*.nii.gz')
+    paid_data, weights = me.me_combine(echoes, algorithm='paid')
 
 ## Caveats
 
