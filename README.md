@@ -72,7 +72,7 @@ Once installed, a command line tool called mecombine will be available in your P
     examples:
       mecombine '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'
       mecombine '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID
-      mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33
+      mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33 -o sub-001_task-stroop_acq-mecombined_run-01_bold.nii.gz
 
 ## Caveats
 
