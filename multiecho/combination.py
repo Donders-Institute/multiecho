@@ -15,11 +15,10 @@ the following weighting schemes:
 
 import argparse
 import textwrap
-import glob
 import json
 import logging
 import coloredlogs
-import os.path as op
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import nibabel as nib
@@ -28,39 +27,39 @@ import numpy as np
 LOGGER = logging.getLogger()
 
 
-def load_me_data(pattern: str, TEs: Optional[Tuple[float]]) -> List[Tuple[nib.Nifti1Image, float]]:
+def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple[nib.Nifti1Image, float]], list]:
     """Load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
     Here, echoN is a numpy array of loaded data.
     """
 
-    datafiles = sorted(glob.glob(pattern))
+    datafiles = sorted(pattern.parent.glob(pattern.name))
 
     if TEs is None:
-        json_template = [op.splitext(op.splitext(datafile)[0])[0] + '.json' for datafile in datafiles]
-        TEs = [json.load(open(f, 'r'))['EchoTime'] for f in json_template]
+        jsonfiles = [datafile.with_suffix('').with_suffix('.json') for datafile in datafiles]
+        TEs       = [json.load(jsonfile.open('r'))['EchoTime']     for jsonfile in jsonfiles]
 
     LOGGER.info(f'Multi-Echo times: {TEs}')
-    LOGGER.info(f'Loading ME-files: {datafiles}')
+    LOGGER.info(f'Loading ME-files: {[str(datafile) for datafile in datafiles]}')
 
-    return [(nib.load(datafile), TE) for datafile, TE in zip(datafiles, TEs)], datafiles
+    return [(nib.load(str(datafile)), TEs[n]) for n, datafile in enumerate(datafiles)], datafiles
 
 
-def paid_weights(echoes: List[nib.Nifti1Image], n_vols: int) -> np.array:
+def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np.array:
     """Compute PAID weights from echoes described as a list of tuples,
     as loaded by load_me_data.
 
     w(tCNR) = TE * tSNR
     """
-    def weight(echo: nib.Nifti1Image, TE: float, n_vols: int):
+    def weight(echo: nib.Nifti1Image, TE: float):
         data = echo.get_data()
         mean = data[..., -n_vols:].mean(axis=-1)
         std  = data[..., -n_vols:].std(axis=-1)
         return TE * mean / std
 
     n_vols  = min(n_vols, echoes[0][0].shape[3])
-    weights = [weight(echo, TE, n_vols) for echo, TE in echoes]
+    weights = [weight(echo, TE) for echo, TE in echoes]
 
     return np.stack(weights, axis=-1)
 
@@ -79,7 +78,7 @@ def me_combine(pattern: str,
     - TE
     """
 
-    st = op.splitext
+    outputname = Path(outputname)
 
     # Set the logging level and format & add the streamhandler
     if not LOGGER.hasHandlers():
@@ -89,15 +88,16 @@ def me_combine(pattern: str,
         coloredlogs.install(level='DEBUG', fmt=fmt, datefmt=datefmt)
 
     # Load the data
-    me_data, datafiles = load_me_data(pattern, weights)
+    me_data, datafiles = load_me_data(Path(pattern), weights)
 
     # Parse the filenames
-    datafile, ext2 = st(datafiles[0])
-    datafile, ext1 = st(datafile)
-    if not outputname:
-        outputname = datafile + '_combined' + ext1 + ext2
-    if outputname == op.basename(outputname):
-        outputname = op.join(op.dirname(datafile), outputname)
+    datafile = datafiles[0]
+    datastem = datafile.with_suffix('').stem
+    dataext  = ''.join(datafile.suffixes)
+    if not outputname.name:
+        outputname = (datafile.parent/(datastem + '_combined')).with_suffix(dataext)
+    if not outputname.parent.name:
+        outputname = datafile.parent/outputname
 
     # Compute the weights
     if algorithm == 'average':
@@ -119,18 +119,18 @@ def me_combine(pattern: str,
     header   = me_data[0][0].header
     combined = nib.Nifti1Image(np.nan_to_num(combined), affine, header)
     LOGGER.info(f'Saving combined image to: {outputname}')
-    if op.isfile(outputname):
+    if outputname.is_file():
         LOGGER.warning(f'{outputname} already exists, overwriting its content')
-    combined.to_filename(outputname)
+    combined.to_filename(str(outputname))
 
     # Save the weights
     if saveweights and algorithm == 'PAID':
-        fname = st(st(outputname)[0])[0] + '_weights' + ext1 + ext2
+        fname = (datafile.parent/(datastem + '_combined_weights')).with_suffix(dataext)
         nifti_weights = nib.Nifti1Image(np.squeeze(weights[..., 0, :]),
                                         combined.affine,
                                         combined.header)
         LOGGER.info(f'Saving PAID weights to: {fname}')
-        if op.isfile(fname):
+        if fname.is_file():
             LOGGER.warning(f'{fname} already exists, overwriting its content')
         nifti_weights.to_filename(fname)
 
@@ -149,13 +149,12 @@ def main():
                                             "  mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33 -o sub-001_task-stroop_acq-mecombined_run-01_bold.nii.gz\n ")
     parser.add_argument('pattern', type=str,
                         help='Globlike search pattern with path to select the echo images that need to be combined. Because of the search, be sure to check that not too many files are being read')
-    parser.add_argument('-o','--outputname', type=str,
+    parser.add_argument('-o','--outputname', type=str, default='',
                         help="File output name. If not a fullpath name, then the output will be stored in the same folder as the input. If empty, the output filename will be the filename of the first echo appended with a '_combined' suffix")
+    parser.add_argument('-a','--algorithm', default='TE', choices=['PAID', 'TE', 'average'],
+                        help='Combination algorithm. Default: TE')
     parser.add_argument('-w','--weights', nargs='*', default=None, type=float,
                         help='Weights (e.g. = echo times) for all echoes')
-    parser.add_argument('-a','--algorithm', default='TE',
-                        choices=['PAID', 'TE', 'average'],
-                        help='Combination algorithm. Default: TE')
     parser.add_argument('-s','--saveweights', action='store_true',
                         help='If passed and algorithm is PAID, save weights')
     parser.add_argument('-v','--volumes', type=int, default=100,
