@@ -132,7 +132,7 @@ def me_combine(pattern: str,
         LOGGER.info(f'Saving PAID weights to: {fname}')
         if fname.is_file():
             LOGGER.warning(f'{fname} already exists, overwriting its content')
-        nifti_weights.to_filename(fname)
+        nifti_weights.to_filename(str(fname))
 
 
 def main():
