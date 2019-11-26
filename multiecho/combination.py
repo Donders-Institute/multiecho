@@ -87,7 +87,7 @@ def me_combine(pattern: str,
         LOGGER.setLevel(logging.INFO)
         fmt     = '%(asctime)s - %(name)s - %(levelname)s %(message)s'
         datefmt = '%Y-%m-%d %H:%M:%S'
-        coloredlogs.install(level='DEBUG', fmt=fmt, datefmt=datefmt)
+        coloredlogs.install(level=LOGGER.level, fmt=fmt, datefmt=datefmt)
 
     # Load the data
     me_data, datafiles = load_me_data(Path(pattern), weights)
