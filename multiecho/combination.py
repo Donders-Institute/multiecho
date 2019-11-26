@@ -24,8 +24,6 @@ from typing import List, Optional, Tuple
 import nibabel as nib
 import numpy as np
 
-LOGGER = logging.getLogger()
-
 
 def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple[nib.Nifti1Image, float]], list]:
     """Load all echoes and their TEs.
@@ -69,7 +67,8 @@ def me_combine(pattern: str,
                algorithm: str = 'TE',
                weights: Optional[List[float]] = None,
                saveweights: bool = True,
-               volumes: int = 100):
+               volumes: int = 100,
+               logger: str = ''):
     """General me_combine routine.
 
     Currently supported algorithms:
@@ -77,6 +76,8 @@ def me_combine(pattern: str,
     - PAID
     - TE
     """
+
+    LOGGER = logging.getLogger(logger)
 
     outputname = Path(outputname)
 
@@ -125,7 +126,7 @@ def me_combine(pattern: str,
 
     # Save the weights
     if saveweights and algorithm == 'PAID':
-        fname = (datafile.parent/(datastem + '_combined_weights')).with_suffix(dataext)
+        fname         = (datafile.parent/(datastem + '_combined_weights')).with_suffix(dataext)
         nifti_weights = nib.Nifti1Image(np.squeeze(weights[..., 0, :]),
                                         combined.affine,
                                         combined.header)
