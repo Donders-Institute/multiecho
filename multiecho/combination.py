@@ -68,7 +68,7 @@ def me_combine(pattern: str,
                weights: Optional[List[float]] = None,
                saveweights: bool = True,
                volumes: int = 100,
-               logger: str = ''):
+               logger: str = __name__):
     """General me_combine routine.
 
     Currently supported algorithms:
