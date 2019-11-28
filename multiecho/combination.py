@@ -34,7 +34,7 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
 
     datafiles = sorted(pattern.parent.glob(pattern.name))
 
-    if TEs is None:
+    if not TEs:
         jsonfiles = [datafile.with_suffix('').with_suffix('.json') for datafile in datafiles]
         TEs       = [json.load(jsonfile.open('r'))['EchoTime']     for jsonfile in jsonfiles]
 
