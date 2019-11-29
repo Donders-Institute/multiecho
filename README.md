@@ -1,5 +1,8 @@
 # Multi-echo combinations
 
+[![PyPI version](https://badge.fury.io/py/multiecho.svg)](https://badge.fury.io/py/multiecho)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/multiecho.svg)
+
 This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
 It currently provides three different echo avering algorithms:
 
@@ -34,15 +37,22 @@ The tool only supports Python 3.6+.
 
 Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
 
-    usage: mecombine [-h] [-o OUTPUTNAME] [-w [WEIGHTS [WEIGHTS ...]]]
-                     [-a {PAID,TE,average}] [-s] [-v VOLUMES]
-                     pattern
+    usage: combination.py [-h] [-o OUTPUTNAME] [-a {PAID,TE,average}]
+                          [-w [WEIGHTS [WEIGHTS ...]]] [-s] [-v VOLUMES]
+                          pattern
     
     Combine multi-echo echoes.
     
     Tools to combine multiple echoes from an fMRI acquisition.
     It expects input files saved as NIfTIs, preferably organised
     according to the BIDS standard.
+    
+    Currently three different combination algorithms are supported, implementing
+    the following weighting schemes:
+    
+    1. PAID => TE * SNR
+    2. TE => TE
+    3. Simple Average => 1
     
     positional arguments:
       pattern               Globlike search pattern with path to select the echo
@@ -57,12 +67,12 @@ Once installed, a command line tool called mecombine will be available in your P
                             output will be stored in the same folder as the input.
                             If empty, the output filename will be the filename of
                             the first echo appended with a '_combined' suffix
-                            (default: None)
+                            (default: )
+      -a {PAID,TE,average}, --algorithm {PAID,TE,average}
+                            Combination algorithm. Default: TE (default: TE)
       -w [WEIGHTS [WEIGHTS ...]], --weights [WEIGHTS [WEIGHTS ...]]
                             Weights (e.g. = echo times) for all echoes (default:
                             None)
-      -a {PAID,TE,average}, --algorithm {PAID,TE,average}
-                            Combination algorithm. Default: TE (default: TE)
       -s, --saveweights     If passed and algorithm is PAID, save weights
                             (default: False)
       -v VOLUMES, --volumes VOLUMES
