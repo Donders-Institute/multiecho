@@ -1,6 +1,6 @@
 [metadata]
 name         = 'multiecho'
-version      = '0.2'
+version      = '0.22'
 description  = 'Combine multi-echoes from a multi-echo fMRI acquisition.'
 author       = 'Daniel Gomez and Marcel Zwiers'
 author_email = 'm.zwiers@donders.ru.nl'
