@@ -17,6 +17,8 @@ For more information on multiecho acquisition and combination schemes, please re
 - [Poser et al. (2006)](https://onlinelibrary.wiley.com/doi/full/10.1002/mrm.20900). *BOLD Contrast Sensitivity Enhancement and Artifact Reduction with Multiecho EPI: Parallel-Acquired Inhomogeneity- Desensitized fMRI.* Magn. Reson. Med. 55:6, pp. 1227–35.
 - [Posse, Stefan (2012)](https://doi.org/10.1016/j.neuroimage.2011.10.057). *Multi-Echo Acquisition*. NeuroImage 62:2, pp. 665–671.
 
+> `Multiecho` is developed at the [Donders Institute](https://www.ru.nl/donders/) of the [Radboud University](https://www.ru.nl/english/).
+
 ## Installation
 
 To install, simply run:
