@@ -38,6 +38,11 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
         jsonfiles = [datafile.with_suffix('').with_suffix('.json') for datafile in datafiles]
         TEs       = [json.load(jsonfile.open('r'))['EchoTime']     for jsonfile in jsonfiles]
 
+    # Sort by TE
+    s         = np.argsort(TEs)
+    TEs       = np.array(TEs)[s]
+    datafiles = np.array(datafiles)[s]
+
     LOGGER.info(f'Multi-Echo times: {TEs}')
     LOGGER.info(f'Loading ME-files: {[str(datafile) for datafile in datafiles]}')
 
