@@ -108,7 +108,7 @@ def me_combine(pattern: str,
         weights = None
     elif algorithm == 'PAID':
         if me_data[0][0].ndim < 4:
-            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].get_shape()}")
+            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape()}")
         weights = paid_weights(me_data, volumes)
         # Make the weights have the appropriate number of volumes.
         weights = np.tile(weights[:, :, :, np.newaxis, :],
