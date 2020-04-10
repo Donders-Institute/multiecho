@@ -124,18 +124,22 @@ def me_combine(pattern: str,
         LOGGER.error(f'Unknown algorithm: {algorithm}')
 
     # Truncate incomplete acquisitions (e.g. when the scanner was stopped manually)
-    dim4 = [echo.get_data().shape[3] for echo, TE in me_data]
-    if len(set(dim4)) > 1:
-        LOGGER.warning(f"Not all echos were acquired: {dim4}")
-        if sum(np.diff(dim4)==-1) == 1 and sum(np.diff(dim4)==0) == len(dim4)-2:      # i.e. Only 1 step of size -1 in dim4
-            dim4 = [min(dim4)] * len(dim4)
-            LOGGER.warning(f"Truncating echos to: {dim4}")
-        else:
-            LOGGER.error(f"Inconsistent echo images, skipping {pattern} -> {outputname}")
-            return 1
+    if me_data[0][0].ndim > 3:
+        dim4 = [echo.shape[3] for echo, TE in me_data]
+        if len(set(dim4)) > 1:
+            LOGGER.warning(f"Not all echos were acquired: {dim4}")
+            if sum(np.diff(dim4)==-1) == 1 and sum(np.diff(dim4)==0) == len(dim4)-2:      # i.e. Only 1 step of size -1 in dim4
+                dim4 = [min(dim4)] * len(dim4)
+                LOGGER.warning(f"Truncating echos to: {dim4}")
+            else:
+                LOGGER.error(f"Inconsistent echo images, skipping {pattern} -> {outputname}")
+                return 1
+        echos = np.stack([echo.get_data()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
+
+    else:
+        echos = np.stack([echo.get_data() for echo, TE in me_data], axis=-1)
 
     # Combine the images
-    echos    = np.stack([echo.get_data()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
     combined = np.average(echos, axis=-1, weights=weights)      # np.average normalizes the weights. No need to do that manually.
     affine   = me_data[0][0].affine
     header   = me_data[0][0].header
