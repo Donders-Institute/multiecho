@@ -73,7 +73,7 @@ def me_combine(pattern: str,
                weights: Optional[List[float]] = None,
                saveweights: bool = True,
                volumes: int = 100,
-               logger: str = __name__) -> int:
+               logger: str = 'multi-echo') -> int:
     """General me_combine routine.
     Truncates incomplete acquisitions (e.g. when the scanner was stopped manually)
     Returns an errorcode: 0 = ok, 1 = inconsistent acquisition
