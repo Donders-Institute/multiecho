@@ -108,6 +108,22 @@ def me_combine(pattern: str,
     if not outputname.parent.name:
         outputname = datafile.parent/outputname
 
+    # Truncate incomplete acquisitions (e.g. when the scanner was stopped manually)
+    if me_data[0][0].ndim > 3:
+        dim4 = [echo.shape[3] for echo, TE in me_data]
+        if len(set(dim4)) > 1:
+            LOGGER.warning(f"Not all echos were acquired, found: {dim4} volumes")
+            if sum(np.diff(dim4)==-1) == 1 and sum(np.diff(dim4)==0) == len(dim4)-2:      # i.e. Only 1 step of size -1 in dim4
+                dim4 = [min(dim4)] * len(dim4)
+                LOGGER.warning(f"Truncating echos to: {dim4} volumes")
+            else:
+                LOGGER.error(f"Inconsistent echo images, skipping {pattern} -> {outputname}")
+                return 1
+        echos = np.stack([echo.get_data()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
+
+    else:
+        echos = np.stack([echo.get_data() for echo, TE in me_data], axis=-1)
+
     # Compute the weights
     if algorithm == 'average':
         weights = None
@@ -116,28 +132,11 @@ def me_combine(pattern: str,
             LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape()}")
         weights = paid_weights(me_data, volumes)
         # Make the weights have the appropriate number of volumes.
-        weights = np.tile(weights[:, :, :, np.newaxis, :],
-                          (1, 1, 1, me_data[0][0].shape[3], 1))
+        weights = np.tile(weights[:, :, :, np.newaxis, :], (1, 1, 1, echos.shape[3], 1))
     elif algorithm == 'TE':
         weights = [TE for echo, TE in me_data]
     else:
         LOGGER.error(f'Unknown algorithm: {algorithm}')
-
-    # Truncate incomplete acquisitions (e.g. when the scanner was stopped manually)
-    if me_data[0][0].ndim > 3:
-        dim4 = [echo.shape[3] for echo, TE in me_data]
-        if len(set(dim4)) > 1:
-            LOGGER.warning(f"Not all echos were acquired: {dim4}")
-            if sum(np.diff(dim4)==-1) == 1 and sum(np.diff(dim4)==0) == len(dim4)-2:      # i.e. Only 1 step of size -1 in dim4
-                dim4 = [min(dim4)] * len(dim4)
-                LOGGER.warning(f"Truncating echos to: {dim4}")
-            else:
-                LOGGER.error(f"Inconsistent echo images, skipping {pattern} -> {outputname}")
-                return 1
-        echos = np.stack([echo.get_data()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
-
-    else:
-        echos = np.stack([echo.get_data() for echo, TE in me_data], axis=-1)
 
     # Combine the images
     combined = np.average(echos, axis=-1, weights=weights)      # np.average normalizes the weights. No need to do that manually.
