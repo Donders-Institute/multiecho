@@ -18,6 +18,7 @@ import textwrap
 import json
 import logging
 import coloredlogs
+import shutil
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -148,12 +149,26 @@ def me_combine(pattern: str,
         LOGGER.warning(f'{outputname} already exists, overwriting its content')
     combined.to_filename(str(outputname))
 
+    # Add a combined-echo json sidecar-file
+    outputjson = outputname.with_suffix('').with_suffix('.json')
+    datajsons  = [datafile.with_suffix('').with_suffix('.json') for datafile in datafiles]
+    if datajsons[0].is_file():
+        LOGGER.info(f"Adding a json sidecar-file: {datajsons[0]} -> {outputjson}")
+        shutil.copyfile(datajsons[0], outputjson)
+        with outputjson.open('r') as json_fid:
+            data = json.load(json_fid)
+        data['EchoNumber'] = 1
+        if algorithm == 'PAID':
+            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=np.average(np.nan_to_num(weights[..., 0, :]), axis=(0,1,2)))  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
+        else:
+            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=weights)  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
+        with outputjson.open('w') as json_fid:
+            json.dump(data, json_fid, indent=4)
+
     # Save the weights
     if saveweights and algorithm == 'PAID':
         fname         = (datafile.parent/(datastem + '_combined_weights')).with_suffix(dataext)
-        nifti_weights = nib.Nifti1Image(np.squeeze(weights[..., 0, :]),
-                                        combined.affine,
-                                        combined.header)
+        nifti_weights = nib.Nifti1Image(weights[..., 0, :], combined.affine, combined.header)
         LOGGER.info(f'Saving PAID weights to: {fname}')
         if fname.is_file():
             LOGGER.warning(f'{fname} already exists, overwriting its content')
