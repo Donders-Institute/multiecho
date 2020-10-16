@@ -88,8 +88,8 @@ Once installed, a command line tool called mecombine will be available in your P
 
 ## Caveats
 
-Currently inneficient as we load all datasets into memory. We could iterate through the volumes and only keep the final combined series in memory at any given time.
+Currently inefficient as we load all datasets into memory. We could iterate through the volumes and only keep the final combined series in memory at any given time.
 
-You may receive a runtime warning when combining echoes with `PAID`. If your datasets have voxels with zeros, e.g., if they were masked, a division by 0 will lead to infinite weights. You may safely ignore the warning, but do check your data after the combination.
+You may receive a runtime warning (`invalid value encountered in true_divide`) when combining echoes with `PAID`. If your datasets have voxels with zeros, e.g., if they were masked, a division by 0 will lead to infinite weights. You may safely ignore the warning, but do check your data after the combination.
 
 By default PAID will compute the weights based on the last 100 volumes of the acquisition. Whether this is optimal or not is up to discussion. If you are testing out the combination on a small subset of volumes, say 5 or so, then the weights won't be stable and your image may look noisy.

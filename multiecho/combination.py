@@ -47,7 +47,7 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
     LOGGER.info(f'Multi-Echo times: {TEs}')
     LOGGER.info(f'Loading ME-files: {[str(datafile) for datafile in datafiles]}')
 
-    return [(nib.load(str(datafile)), TEs[n]) for n, datafile in enumerate(datafiles)], datafiles
+    return [(nib.load(str(datafile)), TEs[n]) for n, datafile in enumerate(datafiles)], list(datafiles)
 
 
 def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np.array:
@@ -77,7 +77,7 @@ def me_combine(pattern: str,
                logger: str = 'multi-echo') -> int:
     """General me_combine routine.
     Truncates incomplete acquisitions (e.g. when the scanner was stopped manually)
-    Returns an errorcode: 0 = ok, 1 = inconsistent acquisition
+    Returns an errorcode: 0 = ok, 1 = inconsistent acquisition, 2 = no multi-echo images found
 
     Currently supported algorithms:
     - average
@@ -99,6 +99,9 @@ def me_combine(pattern: str,
 
     # Load the data
     me_data, datafiles = load_me_data(Path(pattern), weights)
+    if not datafiles:
+        LOGGER.warning(f"No multi-echo images found in: {pattern}")
+        return 2
 
     # Parse the filenames
     datafile = datafiles[0]
@@ -159,7 +162,7 @@ def me_combine(pattern: str,
             data = json.load(json_fid)
         data['EchoNumber'] = 1
         if algorithm == 'PAID':
-            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=np.average(np.nan_to_num(weights[..., 0, :]), axis=(0,1,2)))  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
+            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=np.nanmean(weights[..., 0, :], axis=(0,1,2)))  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
         else:
             data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=weights)  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
         with outputjson.open('w') as json_fid:
