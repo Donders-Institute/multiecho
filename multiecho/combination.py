@@ -25,6 +25,8 @@ from typing import List, Optional, Tuple
 import nibabel as nib
 import numpy as np
 
+LOGGER = logging.getLogger(__name__)
+
 
 def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple[nib.Nifti1Image, float]], list]:
     """Load all echoes and their TEs.
@@ -51,8 +53,7 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
 
 
 def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np.array:
-    """Compute PAID weights from echoes described as a list of tuples,
-    as loaded by load_me_data.
+    """Compute PAID weights from echoes described as a list of tuples, as loaded by load_me_data.
 
     w(tCNR) = TE * tSNR
     """
@@ -73,8 +74,7 @@ def me_combine(pattern: str,
                algorithm: str = 'TE',
                weights: Optional[List[float]] = None,
                saveweights: bool = True,
-               volumes: int = 100,
-               logger: str = 'multi-echo') -> int:
+               volumes: int = 100) -> int:
     """General me_combine routine.
     Truncates incomplete acquisitions (e.g. when the scanner was stopped manually)
     Returns an errorcode: 0 = ok, 1 = inconsistent acquisition, 2 = no multi-echo images found
@@ -85,15 +85,12 @@ def me_combine(pattern: str,
     - TE
     """
 
-    global LOGGER
-    LOGGER = logging.getLogger(logger)
-
     outputname = Path(outputname)
 
     # Set the logging level and format & add the streamhandler
     if not LOGGER.hasHandlers():
         LOGGER.setLevel(logging.INFO)
-        fmt     = '%(asctime)s - %(name)s - %(levelname)s %(message)s'
+        fmt     = '%(asctime)s - %(levelname)s %(message)s'
         datefmt = '%Y-%m-%d %H:%M:%S'
         coloredlogs.install(level=LOGGER.level, fmt=fmt, datefmt=datefmt)
 
@@ -162,7 +159,7 @@ def me_combine(pattern: str,
             data = json.load(json_fid)
         data['EchoNumber'] = 1
         if algorithm == 'PAID':
-            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=np.nanmean(weights[..., 0, :], axis=(0,1,2)))  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
+            data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=np.nanmean(weights[...,0,:], axis=(0,1,2)))  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
         else:
             data['EchoTime'] = np.average([TE for echo, TE in me_data], weights=weights)  # This seems to be the best we can do (the BIDS validator indicates there has to be a nr here, an empty value generates a warning)
         with outputjson.open('w') as json_fid:
@@ -171,7 +168,7 @@ def me_combine(pattern: str,
     # Save the weights
     if saveweights and algorithm == 'PAID':
         fname         = (datafile.parent/(datastem + '_combined_weights')).with_suffix(dataext)
-        nifti_weights = nib.Nifti1Image(weights[..., 0, :], combined.affine, combined.header)
+        nifti_weights = nib.Nifti1Image(weights[...,0,:], combined.affine, combined.header)
         LOGGER.info(f'Saving PAID weights to: {fname}')
         if fname.is_file():
             LOGGER.warning(f'{fname} already exists, overwriting its content')
