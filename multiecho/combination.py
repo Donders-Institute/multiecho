@@ -49,7 +49,7 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
     LOGGER.info(f'Multi-Echo times: {TEs}')
     LOGGER.info(f'Loading ME-files: {[str(datafile) for datafile in datafiles]}')
 
-    return [(nib.load(str(datafile)), TEs[n]) for n, datafile in enumerate(datafiles)], list(datafiles)
+    return [(nib.load(datafile), TEs[n]) for n, datafile in enumerate(datafiles)], list(datafiles)
 
 
 def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np.array:
@@ -147,7 +147,7 @@ def me_combine(pattern: str,
     LOGGER.info(f'Saving combined image to: {outputname}')
     if outputname.is_file():
         LOGGER.warning(f'{outputname} already exists, overwriting its content')
-    combined.to_filename(str(outputname))
+    combined.to_filename(outputname)
 
     # Add a combined-echo json sidecar-file
     outputjson = outputname.with_suffix('').with_suffix('.json')
@@ -172,7 +172,7 @@ def me_combine(pattern: str,
         LOGGER.info(f'Saving PAID weights to: {fname}')
         if fname.is_file():
             LOGGER.warning(f'{fname} already exists, overwriting its content')
-        nifti_weights.to_filename(str(fname))
+        nifti_weights.to_filename(fname)
 
     return 0
 
