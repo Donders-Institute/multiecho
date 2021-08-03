@@ -58,7 +58,7 @@ def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np
     w(tCNR) = TE * tSNR
     """
     def weight(echo: nib.Nifti1Image, TE: float):
-        data = echo.get_data()
+        data = echo.get_fdata()
         mean = data[..., -n_vols:].mean(axis=-1)
         std  = data[..., -n_vols:].std(axis=-1)
         return TE * mean / std
@@ -120,10 +120,10 @@ def me_combine(pattern: str,
             else:
                 LOGGER.error(f"Inconsistent echo images, skipping {pattern} -> {outputname}")
                 return 1
-        echos = np.stack([echo.get_data()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
+        echos = np.stack([echo.get_fdata()[:, :, :, 0:dim4[0]] for echo, TE in me_data], axis=-1)
 
     else:
-        echos = np.stack([echo.get_data() for echo, TE in me_data], axis=-1)
+        echos = np.stack([echo.get_fdata() for echo, TE in me_data], axis=-1)
 
     # Compute the weights
     if algorithm == 'average':
