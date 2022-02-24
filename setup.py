@@ -2,11 +2,11 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 # Read the version from file
-with (Path(__file__).parent/'bidscoin'/'version.txt').open('r') as fid:
+with (Path(__file__).parent/'version.txt').open('r') as fid:
     version = fid.read().strip()
 
 # Read the contents of the README file
-with (Path(__file__).parent/'README.rst').open('r') as fid:
+with (Path(__file__).parent/'README.md').open('r') as fid:
     readme = fid.read()
 
 # Read the contents of the requirements file
