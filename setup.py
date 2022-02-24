@@ -1,17 +1,16 @@
-from io import open
-from os import path
+from pathlib import Path
 from setuptools import find_packages, setup
 
 # Read the version from file
-with open(path.join(path.dirname(__file__), 'version.txt')) as fid:
+with (Path(__file__).parent/'bidscoin'/'version.txt').open('r') as fid:
     version = fid.read().strip()
 
 # Read the contents of the README file
-with open('README.md', 'r', encoding='utf-8') as f:
-    readme = f.read()
+with (Path(__file__).parent/'README.rst').open('r') as fid:
+    readme = fid.read()
 
 # Read the contents of the requirements file
-with open(path.join(path.abspath(path.dirname(__file__)), 'requirements.txt')) as fid:
+with (Path(__file__).parent/'requirements.txt').open('r') as fid:
     requirements = fid.read().splitlines()
 
 setup(name                          = 'multiecho',          # Required
