@@ -130,7 +130,7 @@ def me_combine(pattern: str, outputname: str='', algorithm: str='TE', weights: O
         weights = None
     elif algorithm == 'PAID':
         if me_data[0][0].ndim < 4:
-            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape}\nSkipping {pattern} -> {outputname}")
+            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape}\nSkipping: {pattern} -> {outputname}")
             return 1
         weights = paid_weights(me_data, volumes)
         # Make the weights have the appropriate number of volumes.
