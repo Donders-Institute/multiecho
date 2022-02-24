@@ -1,17 +1,14 @@
 from pathlib import Path
-from setuptools import find_packages, setup
+from setuptools import setup, find_packages
 
 # Read the version from file
-with (Path(__file__).parent/'version.txt').open('r') as fid:
-    version = fid.read().strip()
+version = (Path(__file__).parent/'version.txt').read_text().strip()
 
 # Read the contents of the README file
-with (Path(__file__).parent/'README.md').open('r') as fid:
-    readme = fid.read()
+readme = (Path(__file__).parent/'README.md').read_text()
 
 # Read the contents of the requirements file
-with (Path(__file__).parent/'requirements.txt').open('r') as fid:
-    requirements = fid.read().splitlines()
+requirements = (Path(__file__).parent/'requirements.txt').read_text().splitlines()
 
 setup(name                          = 'multiecho',          # Required
       version                       = version,              # Required
