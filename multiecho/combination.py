@@ -29,7 +29,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple[nib.Nifti1Image, float]], list]:
-    """Load all echoes and their TEs.
+    """
+    Load all echoes and their TEs.
     Return a list of tuples like:
     [(echo1, TE1), (echo2, TE2), ..., (echoN, TEN)]
     Here, echoN is a numpy array of loaded data.
@@ -53,7 +54,8 @@ def load_me_data(pattern: Path, TEs: Optional[Tuple[float]]) -> Tuple[List[Tuple
 
 
 def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np.array:
-    """Compute PAID weights from echoes described as a list of tuples, as loaded by load_me_data.
+    """
+    Compute PAID weights from echoes described as a list of tuples, as loaded by load_me_data.
 
     w(tCNR) = TE * tSNR
     """
@@ -69,20 +71,18 @@ def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np
     return np.stack(weights, axis=-1)
 
 
-def me_combine(pattern: str,
-               outputname: str = '',
-               algorithm: str = 'TE',
-               weights: Optional[List[float]] = None,
-               saveweights: bool = True,
-               volumes: int = 100) -> int:
-    """General me_combine routine.
+def me_combine(pattern: str, outputname: str='', algorithm: str='TE', weights: Optional[List[float]]=None,
+               saveweights: bool=True, volumes: int=100) -> int:
+    """
+    General me_combine routine.
     Truncates incomplete acquisitions (e.g. when the scanner was stopped manually)
-    Returns an errorcode: 0 = ok, 1 = inconsistent acquisition, 2 = no multi-echo images found
 
     Currently supported algorithms:
     - average
     - PAID
     - TE
+
+    Returns an errorcode: 0 = ok, 1 = inconsistent acquisition, 2 = no multi-echo images found
     """
 
     outputname = Path(outputname)
@@ -130,7 +130,8 @@ def me_combine(pattern: str,
         weights = None
     elif algorithm == 'PAID':
         if me_data[0][0].ndim < 4:
-            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape()}")
+            LOGGER.error(f"PAID requires 4D data, {datafile} has size: {me_data[0][0].shape}\nSkipping {pattern} -> {outputname}")
+            return 1
         weights = paid_weights(me_data, volumes)
         # Make the weights have the appropriate number of volumes.
         weights = np.tile(weights[:, :, :, np.newaxis, :], (1, 1, 1, echos.shape[3], 1))
@@ -189,18 +190,12 @@ def main():
                                             "  mecombine '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
                                             "  mecombine '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
                                             "  mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33 -o sub-001_task-stroop_acq-mecombined_run-01_bold.nii.gz\n ")
-    parser.add_argument('pattern', type=str,
-                        help='Globlike search pattern with path to select the echo images that need to be combined. Because of the search, be sure to check that not too many files are being read')
-    parser.add_argument('-o','--outputname', type=str, default='',
-                        help="File output name. If not a fullpath name, then the output will be stored in the same folder as the input. If empty, the output filename will be the filename of the first echo appended with a '_combined' suffix")
-    parser.add_argument('-a','--algorithm', default='TE', choices=['PAID', 'TE', 'average'],
-                        help='Combination algorithm. Default: TE')
-    parser.add_argument('-w','--weights', nargs='*', default=None, type=float,
-                        help='Weights (e.g. = echo times) for all echoes')
-    parser.add_argument('-s','--saveweights', action='store_true',
-                        help='If passed and algorithm is PAID, save weights')
-    parser.add_argument('-v','--volumes', type=int, default=100,
-                        help='Number of volumes that is used to compute the weights if algorithm is PAID')
+    parser.add_argument('pattern', type=str, help='Globlike search pattern with path to select the echo images that need to be combined. Because of the search, be sure to check that not too many files are being read')
+    parser.add_argument('-o','--outputname', type=str, default='', help="File output name. If not a fullpath name, then the output will be stored in the same folder as the input. If empty, the output filename will be the filename of the first echo appended with a '_combined' suffix")
+    parser.add_argument('-a','--algorithm', default='TE', choices=['PAID', 'TE', 'average'], help='Combination algorithm. Default: TE')
+    parser.add_argument('-w','--weights', nargs='*', default=None, type=float, help='Weights (e.g. = echo times) for all echoes')
+    parser.add_argument('-s','--saveweights', action='store_true', help='If passed and algorithm is PAID, save weights')
+    parser.add_argument('-v','--volumes', type=int, default=100, help='Number of volumes that is used to compute the weights if algorithm is PAID')
 
     args = parser.parse_args()
 
