@@ -8,9 +8,9 @@ It currently provides three different echo avering algorithms:
 
 |algorithm  | description |
 |:--------- |:----------- |
-|1. average | Echoes are weighted equally
-|2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions
-|3. TE      | Echoes are weighted by their TEs
+|1. average | Echoes are weighted equally |
+|2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions |
+|3. TE      | Echoes are weighted by their TEs |
 
 For more information on multiecho acquisition and combination schemes, please refer to (for example):
 

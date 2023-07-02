@@ -24,7 +24,7 @@ setup(name                          = 'multiecho',          # Required
       maintainer                    = 'Marcel Zwiers',
       maintainer_email              = 'm.zwiers@donders.ru.nl',
       url                           = 'https://github.com/Donders-Institute/multiecho',
-      license                       = 'MIT/Apache-2.0',
+      license                       = 'Apache-2.0 or MIT',
       keywords                      = ['fmri', 'multi-echo', 'bids'],
       classifiers                   = ['Intended Audience :: Developers',
                                        'License :: OSI Approved :: MIT License',
@@ -35,4 +35,5 @@ setup(name                          = 'multiecho',          # Required
                                        'Programming Language :: Python :: 3.7',
                                        'Programming Language :: Python :: 3.8',
                                        'Programming Language :: Python :: 3.9',
+                                       'Programming Language :: Python :: 3.10',
                                        'Programming Language :: Python :: Implementation :: CPython'])

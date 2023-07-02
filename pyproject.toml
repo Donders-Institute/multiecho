@@ -4,11 +4,11 @@ version      = '0.28'
 description  = 'Combine multi-echoes from a multi-echo fMRI acquisition.'
 author       = 'Daniel Gomez and Marcel Zwiers'
 author_email = 'm.zwiers@donders.ru.nl'
-license      = 'MIT/Apache-2.0'
+license      = 'Apache-2.0 OR MIT'
 url          = 'https://github.com/Donders-Institute/multiecho'
 
 [requires]
-python_version = ['3.6', '3.7', '3.8', '3.9']
+python_version = ['3.6', '3.7', '3.8', '3.9', 3.10]
 
 [build-system]
 requires = ['setuptools', 'wheel']
