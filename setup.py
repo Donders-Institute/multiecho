@@ -12,7 +12,7 @@ requirements = (Path(__file__).parent/'requirements.txt').read_text().splitlines
 
 setup(name                          = 'multiecho',          # Required
       version                       = version,              # Required
-      packages                      = find_packages(),      # Required
+      packages                      = find_packages(exclude=['tests*']),      # Required
       install_requires              = requirements,
       tests_require                 = ['coverage', 'pytest'],
       entry_points                  = {'console_scripts': ['mecombine = multiecho.combination:main']},
