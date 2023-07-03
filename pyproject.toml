@@ -11,7 +11,7 @@ url          = 'https://github.com/Donders-Institute/multiecho'
 python_version = ['3.6', '3.7', '3.8', '3.9', 3.10]
 
 [build-system]
-requires = ['setuptools', 'wheel']
+requires = ['setuptools', 'wheel', 'argparse-manpage[setuptools]']
 
 [tool.hatch.commands]
 prerelease = 'hatch build'
