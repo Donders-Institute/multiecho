@@ -16,7 +16,5 @@ requires = ['setuptools >= 62.2.0', 'wheel', 'argparse-manpage[setuptools]']
 [tool.hatch.commands]
 prerelease = 'hatch build'
 
-[build_manpages]
-manpages = [
-    "man/mecombine.1:function=make_parser:pyfile=multiecho/_args.py",
-]
+[tool.build_manpages]
+manpages = ["man/mecombine.1:function=make_parser:pyfile=multiecho/_args.py"]
