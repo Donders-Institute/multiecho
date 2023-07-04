@@ -6,11 +6,11 @@
 MRI data acquisitions can involve multiple volumes acquired at different echo times. Typically, subsequent processing pipelines assume data to be acquired at a singl echo time. This repository provides a command line tool to combine multiple echoes from a multi-echo (BOLD f)MRI acquisition.
 It currently provides three different echo avering algorithms:
 
-|algorithm  | description                                                                                 |
-|:--------- |:--------------------------------------------------------------------------------------------|
-|1. average | Echoes are weighted equally                                                                 |
-|2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions (BOLD fMRI data only) |
-|3. TE      | Echoes are weighted by their TEs                                                            |
+| algorithm  | description                                                                                 |
+|:-----------|:--------------------------------------------------------------------------------------------|
+| 1. average | Echoes are weighted equally                                                                 |
+| 2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions (BOLD fMRI data only) |
+| 3. TE      | Echoes are weighted by their TEs                                                            |
 
 For more information on multiecho acquisition and combination schemes, please refer to (for example):
 
@@ -39,7 +39,7 @@ The tool supports Python 3.6+.
 
 Once installed, a command line tool called `mecombine` should be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
 
-    usage: combination.py [-h] [-o OUTPUTNAME] [-a {PAID,TE,average}]
+    usage: mecombine [-h] [-o OUTPUTNAME] [-a {PAID,TE,average}]
                           [-w [WEIGHTS [WEIGHTS ...]]] [-s] [-v VOLUMES]
                           pattern
     
