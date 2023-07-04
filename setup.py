@@ -1,5 +1,6 @@
 from pathlib import Path
 from setuptools import setup, find_packages
+from build_manpages import build_manpages, get_build_py_cmd, get_install_cmd
 
 # Read the version from file
 version = (Path(__file__).parent/'version.txt').read_text().strip()
@@ -16,6 +17,9 @@ setup(name                          = 'multiecho',          # Required
       install_requires              = requirements,
       tests_require                 = ['coverage', 'pytest'],
       entry_points                  = {'console_scripts': ['mecombine = multiecho.combination:main']},
+      cmdclass                      = {'build_manpages': build_manpages,
+                                       'build_py': get_build_py_cmd(),
+                                       'install': get_install_cmd()},
       description                   = 'Combine multi-echoes from a multi-echo fMRI acquisition.',
       long_description              = readme,
       long_description_content_type = 'text/markdown',
