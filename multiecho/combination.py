@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import argparse
-import textwrap
 import json
 import logging
 import coloredlogs
@@ -168,9 +166,6 @@ def me_combine(pattern: str, outputname: str='', algorithm: str='TE', weights: O
 
 def main():
     """Console script usage"""
-
-    class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
-        pass
 
     args = _args.make_parser().parse_args()
 

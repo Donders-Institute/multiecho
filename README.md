@@ -3,21 +3,21 @@
 [![PyPI version](https://badge.fury.io/py/multiecho.svg)](https://badge.fury.io/py/multiecho)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/multiecho.svg)
 
-This repository provides a command line tool to combine multiple echoes from a multi-echo BOLD fMRI acquisition.
+MRI data acquisitions can involve multiple volumes acquired at different echo times. Typically, subsequent processing pipelines assume data to be acquired at a singl echo time. This repository provides a command line tool to combine multiple echoes from a multi-echo (BOLD f)MRI acquisition.
 It currently provides three different echo avering algorithms:
 
-|algorithm  | description |
-|:--------- |:----------- |
-|1. average | Echoes are weighted equally |
-|2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions |
-|3. TE      | Echoes are weighted by their TEs |
+|algorithm  | description                                                                                 |
+|:--------- |:--------------------------------------------------------------------------------------------|
+|1. average | Echoes are weighted equally                                                                 |
+|2. PAID    | Echoes are weighted by their CNR, i.e. by their TE*tSNR contributions (BOLD fMRI data only) |
+|3. TE      | Echoes are weighted by their TEs                                                            |
 
 For more information on multiecho acquisition and combination schemes, please refer to (for example):
 
 - [Poser et al. (2006)](https://onlinelibrary.wiley.com/doi/full/10.1002/mrm.20900). *BOLD Contrast Sensitivity Enhancement and Artifact Reduction with Multiecho EPI: Parallel-Acquired Inhomogeneity- Desensitized fMRI.* Magn. Reson. Med. 55:6, pp. 1227–35.
 - [Posse, Stefan (2012)](https://doi.org/10.1016/j.neuroimage.2011.10.057). *Multi-Echo Acquisition*. NeuroImage 62:2, pp. 665–671.
 
-> `Multiecho` is developed at the [Donders Institute](https://www.ru.nl/donders/) of the [Radboud University](https://www.ru.nl/english/).
+> `Multiecho` has been developed at the [Donders Institute](https://www.ru.nl/donders/) of the [Radboud University](https://www.ru.nl/english/).
 
 ## Installation
 
@@ -25,19 +25,19 @@ To install, simply run:
 
     pip install multiecho
  
-This will give you the latest stable release of the software. To get the very latest version of the software you can install the package directly from the github source code repository:
+This will give you the latest stable release of the software. To get the very latest (possibly unreleased) version of the software you can install the package directly from the Github source code repository:
 
     pip install git+https://github.com/Donders-Institute/multiecho
 
-Alternatively, to get the latest (possibly unreleased) code, clone this repository and run the following on the root folder of the repository:
+Alternatively, clone this repository and run the following on the root folder of the repository:
 
     pip install .
 
-The tool only supports Python 3.6+.
+The tool supports Python 3.6+.
 
 ## Usage
 
-Once installed, a command line tool called mecombine will be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
+Once installed, a command line tool called `mecombine` should be available in your PATH. Detailed usage information can be found by running `mecombine -h`:
 
     usage: combination.py [-h] [-o OUTPUTNAME] [-a {PAID,TE,average}]
                           [-w [WEIGHTS [WEIGHTS ...]]] [-s] [-v VOLUMES]
@@ -88,8 +88,8 @@ Once installed, a command line tool called mecombine will be available in your P
 
 ## Caveats
 
-Currently inefficient as we load all datasets into memory. We could iterate through the volumes and only keep the final combined series in memory at any given time.
+Currently, the echo combination is resource hungry as we load all datasets into memory at once. We could iterate through the volumes and only keep the final combined series in memory at any given time.
 
 You may receive a runtime warning (`invalid value encountered in true_divide`) when combining echoes with `PAID`. If your datasets have voxels with zeros, e.g., if they were masked, a division by 0 will lead to infinite weights. You may safely ignore the warning, but do check your data after the combination.
 
-By default PAID will compute the weights based on the last 100 volumes of the acquisition. Whether this is optimal or not is up to discussion. If you are testing out the combination on a small subset of volumes, say 5 or so, then the weights won't be stable and your image may look noisy.
+By default, PAID will compute the weights based on the last 100 volumes of the acquisition. Whether this is optimal or not is up to discussion. If you are testing out the combination on a small subset of volumes, say 5 or so, then the weights won't be stable and your image may look noisy.
