@@ -4,12 +4,9 @@ import logging
 import coloredlogs
 import shutil
 from pathlib import Path
-from typing import List, Optional, Tuple
-
+from typing import List, Optional, Tuple, Union
 import nibabel as nib
 import numpy as np
-
-from . import _args
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,7 +54,7 @@ def paid_weights(echoes: List[Tuple[nib.Nifti1Image, float]], n_vols: int) -> np
     return np.stack(weights, axis=-1)
 
 
-def me_combine(pattern: str, outputname: str='', algorithm: str='TE', weights: Optional[List[float]]=None,
+def me_combine(pattern: Union[str,Path], outputname: Union[str,Path]='', algorithm: str='TE', weights: Optional[List[float]]=None,
                saveweights: bool=True, volumes: int=100) -> int:
     """
     General me_combine routine.
@@ -166,6 +163,8 @@ def me_combine(pattern: str, outputname: str='', algorithm: str='TE', weights: O
 
 def main():
     """Console script usage"""
+
+    from . import _args
 
     args = _args.make_parser().parse_args()
 
