@@ -11,9 +11,9 @@ readme = (Path(__file__).parent/'README.md').read_text()
 # Read the contents of the requirements file
 requirements = (Path(__file__).parent/'requirements.txt').read_text().splitlines()
 
-setup(name                          = 'multiecho',          # Required
-      version                       = version,              # Required
-      packages                      = find_packages(exclude=['tests*']),      # Required
+setup(name                          = 'multiecho',                          # Required
+      version                       = version,                              # Required
+      packages                      = find_packages(exclude=['tests*']),    # Required
       install_requires              = requirements,
       tests_require                 = ['coverage', 'pytest'],
       entry_points                  = {'console_scripts': ['mecombine = multiecho.combination:main']},
@@ -35,9 +35,5 @@ setup(name                          = 'multiecho',          # Required
                                        'License :: OSI Approved :: Apache Software License',
                                        'Natural Language :: English',
                                        'Operating System :: OS Independent',
-                                       'Programming Language :: Python :: 3.6',
-                                       'Programming Language :: Python :: 3.7',
-                                       'Programming Language :: Python :: 3.8',
-                                       'Programming Language :: Python :: 3.9',
-                                       'Programming Language :: Python :: 3.10',
+                                       'Programming Language :: Python :: 3',
                                        'Programming Language :: Python :: Implementation :: CPython'])
