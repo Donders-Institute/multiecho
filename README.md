@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/multiecho.svg)](https://badge.fury.io/py/multiecho)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/multiecho.svg)
 
-MRI data acquisitions can involve multiple volumes acquired at different echo times. Typically, subsequent processing pipelines assume data to be acquired at a singl echo time. This repository provides a command line tool to combine multiple echoes from a multi-echo (BOLD f)MRI acquisition.
+MRI data acquisitions can involve multiple volumes acquired at different echo times. Typically, subsequent processing pipelines assume data to be acquired at a single echo time. This repository provides a command line tool to combine multiple echoes from a multi-echo (BOLD f)MRI acquisition.
 It currently provides three different echo avering algorithms:
 
 | algorithm  | description                                                                                 |
