@@ -28,7 +28,7 @@ setup(name                          = 'multiecho',                          # Re
       maintainer                    = 'Marcel Zwiers',
       maintainer_email              = 'm.zwiers@donders.ru.nl',
       url                           = 'https://github.com/Donders-Institute/multiecho',
-      license                       = 'Apache-2.0 or MIT',
+      license_files                 = ['Apache-2.0 or MIT'],
       keywords                      = ['mri', 'multi-echo', 'bids'],
       classifiers                   = ['Intended Audience :: Developers',
                                        'License :: OSI Approved :: MIT License',
