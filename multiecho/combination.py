@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
 import logging
-import coloredlogs
 import shutil
+from rich.logging import RichHandler
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 import nibabel as nib
@@ -70,12 +70,10 @@ def me_combine(pattern: Union[str,Path], outputname: Union[str,Path]='', algorit
 
     outputname = Path(outputname)
 
-    # Set the logging level and format & add the streamhandler
+    # Set the logging level and format & add a rich console handler
     if not LOGGER.hasHandlers():
         LOGGER.setLevel(logging.INFO)
-        fmt     = '%(asctime)s - %(levelname)s %(message)s'
-        datefmt = '%Y-%m-%d %H:%M:%S'
-        coloredlogs.install(level=LOGGER.level, fmt=fmt, datefmt=datefmt)
+        LOGGER.addHandler(RichHandler(show_time=False, show_level=True, show_path=False, rich_tracebacks=True, markup=True, level='INFO'))
 
     # Load the data
     me_data, datafiles = load_me_data(Path(pattern), weights)

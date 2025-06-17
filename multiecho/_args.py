@@ -25,9 +25,9 @@ def make_parser():
                                      formatter_class=CustomFormatter,
                                      description=textwrap.dedent(doc),
                                      epilog="examples:\n"
-                                            "  mecombine '/project/number/bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
-                                            "  mecombine '/project/number/bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
-                                            "  mecombine '/project/number/bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33 -o sub-001_task-stroop_acq-mecombined_run-01_bold.nii.gz\n ")
+                                            "  mecombine 'bids/sub-001/func/*_task-motor_*echo-*.nii.gz'\n"
+                                            "  mecombine 'bids/sub-001/func/*_task-rest_*echo-*.nii.gz' -a PAID\n"
+                                            "  mecombine 'bids/sub-001/func/*_acq-MBME_*run-01*.nii.gz' -w 11 22 33 -o sub-001_task-stroop_acq-mecombined_run-01_bold.nii.gz\n ")
 
     parser.add_argument('pattern', type=str, help='Globlike search pattern with path to select the echo images that need to be combined. Because of the search, be sure to check that not too many files are being read')
     parser.add_argument('-o','--outputname', type=str, default='', help="File output name. If not a fullpath name, then the output will be stored in the same folder as the input. If empty, the output filename will be the filename of the first echo appended with a '_combined' suffix")
